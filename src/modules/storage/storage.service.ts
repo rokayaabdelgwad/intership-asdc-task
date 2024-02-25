@@ -22,28 +22,46 @@ export class storageService {
     private readonly loggerService: LoggerService,
   ) {}
 
-  async uploadImage(file:MemoryStorageFile,data:any, fieldname:string){
-    const filename=generateFilename(fieldname).toString()
-    const uploadPath=path.join(process.cwd(),'uploads','imag',filename)
-    try{
-        if(!fs.existsSync(path.dirname(uploadPath))){
-            fs.mkdirSync(path.dirname(uploadPath),{recursive:true})
+  async uploadImage(file: MemoryStorageFile, fieldname: string) {
+    try {
+        if (!file || !file.buffer) {
+            throw new CustomBadRequestException('File or file buffer is missing.');
         }
-        fs.writeFileSync(uploadPath, file.buffer);
-        const userDate={...data,[fieldname]:filename}
-        const user=await this.prisma.user.create({data:userDate})
-        return {[fieldname]:user[fieldname]}
-    }catch(error) {
-        this.loggerService.logError(error);
-        throw new InternalServerErrorException(`Error uploading ${fieldname} image`);
-    }
 
-  }
+        const filename = generateFilename(fieldname).toString();
+        const uploadPath = path.join(process.cwd(), 'uploads', 'imag', filename);
+
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(path.dirname(uploadPath))) {
+            fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
+        }
+
+        // Asynchronously write file
+        await fs.promises.writeFile(uploadPath, Buffer.from(file.buffer));
+
+        const userData = {
+            [fieldname]: filename
+            // Add other fields as necessary
+        };
+
+        // Create user in the database
+        const user = await this.prisma.user.create({ data: userData });
+
+        return { [fieldname]: user[fieldname] };
+    } catch (error) {
+        this.loggerService.logError(error);
+        if (error instanceof CustomBadRequestException) {
+            throw error; // Re-throw custom bad request exception
+        } else {
+            throw new InternalServerErrorException(`Error uploading ${fieldname} image`);
+        }
+    }
+}
    async uploadNationalIdImage(file:MemoryStorageFile ){
 
-    return this.uploadImage(file,{},'nationalIDImage')
+    return this.uploadImage(file,'nationalID_Image')
   }
   async uploadProfilePicture(file:MemoryStorageFile){
-    return this.uploadImage(file,{},'profile_pic')
+    return this.uploadImage(file,'profile_picture')
   }
 }

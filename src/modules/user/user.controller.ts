@@ -47,8 +47,8 @@ export class UserController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'nationalIDImage', maxCount: 1 },
-        { name: 'profile_pic', maxCount: 1 },
+        { name: 'nationalID_Image', maxCount: 1 },
+        { name: 'profile_picture', maxCount: 1 },
       ],
       {
         storage: diskStorage({
@@ -61,18 +61,11 @@ export class UserController {
     ),
   )
   async createUser(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 200000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
-      }),
-    )
-    dto: UserDto,
-     @UploadedFiles()  nationalIDImage?: Express.Multer.File[], profile_pic?: Express.Multer.File[] 
+    @Body() dto: UserDto,
+    @UploadedFiles() files: { nationalID_Image?: Express.Multer.File[], profile_picture?: Express.Multer.File[] },
   ) {
-    return this.userService.createUser(dto);
+    const {  nationalID_Image, profile_picture } = files;
+    return this.userService.createUser(dto, nationalID_Image[0], profile_picture[0]);
   }
 
   @Get('get-all-users')
