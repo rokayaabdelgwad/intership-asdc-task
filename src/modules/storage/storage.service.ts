@@ -24,11 +24,12 @@ export class storageService {
 
   async uploadImage(file:MemoryStorageFile,data:any, fieldname:string){
     const filename=generateFilename(fieldname).toString()
-    const uploadPath=path.join(process.cwd(),'upload','imag',filename)
+    const uploadPath=path.join(process.cwd(),'uploads','imag',filename)
     try{
         if(!fs.existsSync(path.dirname(uploadPath))){
             fs.mkdirSync(path.dirname(uploadPath),{recursive:true})
         }
+        fs.writeFileSync(uploadPath, file.buffer);
         const userDate={...data,[fieldname]:filename}
         const user=await this.prisma.user.create({data:userDate})
         return {[fieldname]:user[fieldname]}
@@ -38,7 +39,7 @@ export class storageService {
     }
 
   }
-   async uploadNationalIdImage(file:MemoryStorageFile){
+   async uploadNationalIdImage(file:MemoryStorageFile ){
 
     return this.uploadImage(file,{},'nationalIDImage')
   }
