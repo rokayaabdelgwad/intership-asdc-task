@@ -1,0 +1,34 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id  Int  @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email String?  @unique
+  hash String?
+  firstName String?  //optional 
+  lastName String?  //optional
+  profile_pic String? 
+  nationalIDImage String?  
+	nationalID  String?
+  status String?
+
+}
+model expiredTokens {
+  id        Int      @id @default(autoincrement())
+  token     String   @db.VarChar(255)
+  email     String
+  createdAt DateTime @default(now())
+  isExpired Boolean  @default(false)
+  deleted Boolean @default(false)
+
+  @@index([deleted])
+}

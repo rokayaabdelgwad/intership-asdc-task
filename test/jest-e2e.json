@@ -1,0 +1,9 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "babel-node",
+  "testMatch": ["**/*.spec.ts"],
+  "modulePathIgnorePatterns": ["<rootDir>/dist/"],
+  "setupFiles": [
+    "dotenv/config"
+  ]
+}
